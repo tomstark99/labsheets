@@ -165,3 +165,7 @@ fabric.properties
 .idea
 
 .DS_store
+
+# tensorboard logs
+
+**/logs
