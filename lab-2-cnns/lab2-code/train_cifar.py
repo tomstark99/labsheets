@@ -48,7 +48,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--log-frequency",
-    default=10,
+    default=100,
     type=int,
     help="How frequently to save logs to tensorboard in number of steps",
 )
