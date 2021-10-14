@@ -28,6 +28,7 @@ default_dataset_dir = Path.home() / ".cache" / "torch" / "datasets"
 parser.add_argument("--dataset-root", default=default_dataset_dir)
 parser.add_argument("--log-dir", default=Path("logs"), type=Path)
 parser.add_argument("--learning-rate", default=1e-2, type=float, help="Learning rate")
+parser.add_argument("--momentum", default=0.2, type=float, help="Momentum")
 parser.add_argument(
     "--batch-size",
     default=128,
@@ -48,13 +49,13 @@ parser.add_argument(
 )
 parser.add_argument(
     "--log-frequency",
-    default=100,
+    default=10,
     type=int,
     help="How frequently to save logs to tensorboard in number of steps",
 )
 parser.add_argument(
     "--print-frequency",
-    default=10,
+    default=100,
     type=int,
     help="How frequently to print progress to the command line in number of steps",
 )
@@ -107,7 +108,7 @@ def main(args):
 
     criterion = nn.CrossEntropyLoss()
 
-    optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.2)
+    optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=args.momentum)
 
     log_dir = get_summary_writer_log_dir(args)
     print(f"Writing logs to {log_dir}")
