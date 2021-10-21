@@ -29,6 +29,7 @@ parser.add_argument("--dataset-root", default=default_dataset_dir)
 parser.add_argument("--log-dir", default=Path("logs"), type=Path)
 parser.add_argument("--learning-rate", default=1e-1, type=float, help="Learning rate")
 parser.add_argument("--sgd-momentum", default=0.2, type=float, help="Momentum")
+parser.add_argument("--batch-norm", default=False, type=bool, help="Use batch norm")
 parser.add_argument(
     "--batch-size",
     default=64,
@@ -104,7 +105,7 @@ def main(args):
         pin_memory=True,
     )
 
-    model = CNN(height=32, width=32, channels=3, class_count=10)
+    model = CNN(height=32, width=32, channels=3, class_count=10, batch_norm=args.batch_norm)
 
     criterion = nn.CrossEntropyLoss()
 
@@ -131,11 +132,11 @@ def main(args):
 
 
 class CNN(nn.Module):
-    def __init__(self, height: int, width: int, channels: int, class_count: int):
+    def __init__(self, height: int, width: int, channels: int, class_count: int, batch_norm: bool):
         super().__init__()
         self.input_shape = ImageShape(height=height, width=width, channels=channels)
         self.class_count = class_count
-
+        self.batch = batch_norm
         self.conv1 = nn.Conv2d(
             in_channels=self.input_shape.channels,
             out_channels=32,
@@ -162,10 +163,19 @@ class CNN(nn.Module):
         self.initialise_layer(self.conv2)
 
     def forward(self, images: torch.Tensor) -> torch.Tensor:
-        x = self.pool(F.relu(self.batch1(self.conv1(images))))
-        x = self.pool(F.relu(self.batch2(self.conv2(x))))
+        x = self.conv1(images)
+        if self.batch:
+            x = self.batch1(x)
+        x = self.pool(F.relu(x))
+        x = self.conv2(x)
+        if self.batch:
+            x = self.batch2(x)
+        x = self.pool(F.relu(x))
         x = torch.flatten(x, 1)
-        x = F.relu(self.batch3(self.fc1(x)))
+        x = self.fc1(x)
+        if self.batch:
+            self.batch3(x)
+        x = F.relu(x)
         x = self.fc2(x)
         return x
 
@@ -338,7 +348,11 @@ def get_summary_writer_log_dir(args: argparse.Namespace) -> str:
         from getting logged to the same TB log directory (which you can't easily
         untangle in TB).
     """
-    tb_log_dir_prefix = f'CNN_bs={args.batch_size}_lr={args.learning_rate}_momentum={args.sgd_momentum}_run_'
+    if args.batch_norm:
+        tb_log_dir_prefix = f'CNN_bn_bs={args.batch_size}_lr={args.learning_rate}_momentum={args.sgd_momentum}_run_'
+    else:
+        tb_log_dir_prefix = f'CNN_bs={args.batch_size}_lr={args.learning_rate}_momentum={args.sgd_momentum}_run_'
+
     i = 0
     while i < 1000:
         tb_log_dir = args.log_dir / (tb_log_dir_prefix + str(i))
