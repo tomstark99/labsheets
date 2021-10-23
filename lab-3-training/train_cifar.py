@@ -32,7 +32,7 @@ parser.add_argument("--sgd-momentum", default=0.2, type=float, help="Momentum")
 parser.add_argument("--batch-norm", default=False, type=bool, help="Use batch norm")
 parser.add_argument(
     "--batch-size",
-    default=64,
+    default=128,
     type=int,
     help="Number of images within each mini-batch",
 )
