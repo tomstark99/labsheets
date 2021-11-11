@@ -30,7 +30,8 @@ parser.add_argument("--log-dir", default=Path("logs"), type=Path)
 parser.add_argument("--learning-rate", default=1e-1, type=float, help="Learning rate")
 parser.add_argument("--sgd-momentum", default=0.2, type=float, help="Momentum")
 parser.add_argument("--batch-norm", default=False, type=bool, help="Use batch norm")
-parser.add_argument("--data-aug-hflip", action="store_true")
+parser.add_argument("--data-aug-hflip", action="store_true", help="random horizontal flip for train data")
+parser.add_argument("--data-aug-brightness", default=0.0, type=float, help="brightness augmentation for train data")
 parser.add_argument(
     "--batch-size",
     default=128,
@@ -87,11 +88,15 @@ def main(args):
         print("fksake")
         transform = transforms.Compose([
             transforms.RandomHorizontalFlip(),
+            transforms.ColorJitter(brightness=args.data_aug_brightness),
             transforms.ToTensor()
         ])
     else:
         print("xd")
-        transform = transforms.ToTensor()
+        transform = transforms.Compose([
+            transforms.ColorJitter(brightness=args.data_aug_brightness),
+            transforms.ToTensor()
+        ])
     print(transform)
     args.dataset_root.mkdir(parents=True, exist_ok=True)
     train_dataset = torchvision.datasets.CIFAR10(
