@@ -296,13 +296,14 @@ class Trainer:
         correct_pred = {classname: 0 for classname in classes}
         total_pred = {classname: 0 for classname in classes}
 
+        self.model.eval()
         with torch.no_grad():
             for batch, labels in self.val_loader:
-                logits = self.model(batch)
+                logits = self.model(batch.to(self.device))
 
-                _, preds = torch.max(logits, 1)
+                preds = logits.argmax(dim=-1).cpu().numpy()
 
-                for label, pred in zip(labels, preds):
+                for label, pred in zip(labels.cpu().numpy(), preds):
                     if label == pred:
                         correct_pred[classes[label]] += 1
                     total_pred[classes[label]] += 1
@@ -363,6 +364,7 @@ class Trainer:
                 self.step
         )
         print(f"validation loss: {average_loss:.5f}, accuracy: {accuracy * 100:2.2f}")
+        self.print_per_class_accuracy()
 
 
 def compute_accuracy(
