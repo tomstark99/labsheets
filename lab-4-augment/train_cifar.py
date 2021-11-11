@@ -146,6 +146,8 @@ def main(args):
         log_frequency=args.log_frequency,
     )
 
+    trainer.print_per_class_accuracy()
+
     summary_writer.close()
 
 
@@ -287,6 +289,27 @@ class Trainer:
                 f"{data_load_time:.5f}, "
                 f"step time: {step_time:.5f}"
         )
+
+    def print_per_class_accuracy(self):
+        classes = ('plane', 'car', 'bird', 'cat',
+           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+        correct_pred = {classname: 0 for classname in classes}
+        total_pred = {classname: 0 for classname in classes}
+
+        with torch.no_grad():
+            for batch, labels in self.val_loader:
+                logits = self.model(batch)
+
+                _, preds = torch.max(logits, 1)
+
+                for label, pred in zip(labels, preds):
+                    if label == pred:
+                        correct_pred[classes[label]] += 1
+                    total_pred[classes[label]] += 1
+        
+        for classname, correct in correct_pred.items():
+            accuracy = 100 * float(correct) / total_pred[classname]
+            print("Accuracy for class {:5s} is: {:.1f}%".format(classname, accuracy))
 
     def log_metrics(self, epoch, accuracy, loss, data_load_time, step_time):
         self.summary_writer.add_scalar("epoch", epoch, self.step)
