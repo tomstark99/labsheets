@@ -366,9 +366,9 @@ def get_summary_writer_log_dir(args: argparse.Namespace) -> str:
         untangle in TB).
     """
     if args.batch_norm:
-        tb_log_dir_prefix = f'CNN_bn_bs={args.batch_size}_lr={args.learning_rate}_momentum={args.sgd_momentum}_{("hflip_" if args.data_aug_hflip else "")}run_'
+        tb_log_dir_prefix = f'CNN_bn_bs={args.batch_size}_lr={args.learning_rate}_momentum={args.sgd_momentum}_brightness={args.data_aug_brightness}_{("hflip_" if args.data_aug_hflip else "")}run_'
     else:
-        tb_log_dir_prefix = f'CNN_bs={args.batch_size}_lr={args.learning_rate}_momentum={args.sgd_momentum}_{("hflip_" if args.data_aug_hflip else "")}run_'
+        tb_log_dir_prefix = f'CNN_bs={args.batch_size}_lr={args.learning_rate}_momentum={args.sgd_momentum}_brightness={args.data_aug_brightness}_{("hflip_" if args.data_aug_hflip else "")}run_'
 
     i = 0
     while i < 1000:
