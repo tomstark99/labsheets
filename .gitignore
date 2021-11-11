@@ -167,5 +167,8 @@ fabric.properties
 .DS_store
 
 # tensorboard logs
-
 **/logs
+
+# Datasets
+data
+**/data
